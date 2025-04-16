@@ -39,7 +39,7 @@ const sendRegistrationEmail = async (user) => {
       <p>Halo ${user.nama},</p>
       <p>Terima kasih telah mendaftar di Healthcare Booking System. Akun Anda telah berhasil dibuat.</p>
       <p><strong>Email:</strong> ${user.email}</p>
-      <p>Salam,<br>Tim Healthcare Booking System</p>
+      <p>Salam,<br>Tim Medical Booking</p>
     </div>
   `;
 

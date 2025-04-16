@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       no_str: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        unique: true,
+        unique: false,
       },
       foto: {
         type: DataTypes.STRING(255),
