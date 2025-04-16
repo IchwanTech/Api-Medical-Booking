@@ -240,7 +240,7 @@ const addLampiranRekamMedis = async (req, res, next) => {
       const lampiran = await LampiranRekamMedis.create({
         id_rekam,
         jenis_lampiran,
-        url_file: `/uploads/lampiran-rekam-medis/${req.file.filename}`,
+        url_file: `/uploads/${req.file.filename}`,
         deskripsi: deskripsi || null,
       });
 

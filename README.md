@@ -6,10 +6,8 @@ Dokumentasi ini berisi penjelasan tentang endpoint API yang tersedia pada Sistem
 
 ## Base URL
 
-Sementara dilokal dulu gais
-
 ```
-http://localhost:3000
+https://probtr.rikpetik.site/api/
 ```
 
 ## Autentikasi

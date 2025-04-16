@@ -59,7 +59,7 @@ const uploadFotoKamar = upload.single("url_foto");
 const uploadBuktiPembayaran = upload.single("bukti_pembayaran");
 
 // Middleware khusus untuk upload lampiran rekam medis
-const uploadLampiranRekamMedis = upload.single("lampiran_rekam_medis");
+const uploadLampiranRekamMedis = upload.single("url_file");
 
 // Fungsi untuk menghapus file
 const deleteFile = (filePath) => {

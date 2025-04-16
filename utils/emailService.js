@@ -31,7 +31,7 @@ const sendEmail = async (to, subject, text, html = null) => {
 
 const sendRegistrationEmail = async (user) => {
   const subject = "Selamat datang di Medical Booking";
-  const text = `Halo ${user.nama},\n\nTerima kasih telah mendaftar di Healthcare Booking System. Akun Anda telah berhasil dibuat.\n\nEmail: ${user.email}\n\nSalam,\nTim Medical Booking`;
+  const text = `Halo ${user.nama},\n\nTerima kasih telah mendaftar di Medical Booking. Akun Anda telah berhasil dibuat.\n\nEmail: ${user.email}\n\nSalam,\nTim Medical Booking`;
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

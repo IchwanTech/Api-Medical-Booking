@@ -69,7 +69,7 @@ app.use("/api/review", reviewRoutes);
 app.use("/api/notifikasi", notifikasiRoutes);
 
 // Health check endpoint
-app.get("/api/health", (req, res) => {
+app.get("/", (req, res) => {
   res
     .status(200)
     .json({ status: "OK", message: "Healthcare Booking API is running" });

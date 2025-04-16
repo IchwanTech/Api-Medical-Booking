@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
           "checked_out",
           "cancelled"
         ),
-        allowNull: false,
+        allowNull: true,
       },
       status_baru: {
         type: DataTypes.ENUM(
