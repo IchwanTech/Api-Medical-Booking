@@ -13,10 +13,8 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    // Verifikasi token
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    // Cek sesi di database
     const session = await SesiUser.findOne({
       where: { id_sesi: decoded.sessionId, is_active: true },
       include: [
@@ -31,7 +29,6 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    // Attach user data ke request
     req.user = session.User;
     req.sessionId = session.id_sesi;
 

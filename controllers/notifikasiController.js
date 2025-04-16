@@ -40,7 +40,6 @@ const getNotifikasiById = async (req, res, next) => {
       return errorResponse(res, "Notifikasi tidak ditemukan", 404);
     }
 
-    // Tandai sebagai dibaca jika belum
     if (!notifikasi.dibaca) {
       await notifikasi.update({ dibaca: true });
     }

@@ -131,13 +131,11 @@ const createRekamMedis = async (req, res, next) => {
       is_bpjs,
     } = req.body;
 
-    // Cek apakah user ada
     const user = await User.findOne({ where: { id_user, deleted_at: null } });
     if (!user) {
       return errorResponse(res, "Pasien tidak ditemukan", 404);
     }
 
-    // Cek apakah dokter ada
     const dokter = await Dokter.findOne({
       where: { id_dokter, deleted_at: null },
     });
@@ -145,7 +143,6 @@ const createRekamMedis = async (req, res, next) => {
       return errorResponse(res, "Dokter tidak ditemukan", 404);
     }
 
-    // Cek apakah janji temu ada (jika disertakan)
     if (id_janji) {
       const janjiTemu = await JanjiTemu.findOne({
         where: { id_janji, deleted_at: null },
@@ -229,7 +226,6 @@ const addLampiranRekamMedis = async (req, res, next) => {
       const { id_rekam } = req.params;
       const { jenis_lampiran, deskripsi } = req.body;
 
-      // Cek apakah rekam medis ada
       const rekamMedis = await RekamMedis.findOne({
         where: { id_rekam, deleted_at: null },
       });
@@ -255,7 +251,6 @@ const deleteLampiranRekamMedis = async (req, res, next) => {
   try {
     const { id_rekam, id_lampiran } = req.params;
 
-    // Cek apakah rekam medis ada
     const rekamMedis = await RekamMedis.findOne({
       where: { id_rekam, deleted_at: null },
     });
@@ -263,7 +258,6 @@ const deleteLampiranRekamMedis = async (req, res, next) => {
       return errorResponse(res, "Rekam medis tidak ditemukan", 404);
     }
 
-    // Cek apakah lampiran ada
     const lampiran = await LampiranRekamMedis.findOne({
       where: { id_lampiran, id_rekam },
     });

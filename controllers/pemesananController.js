@@ -149,7 +149,6 @@ const createPemesanan = async (req, res, next) => {
       } = req.body;
       const id_user = req.user.id_user;
 
-      // Cek apakah kamar ada dan tersedia
       const kamar = await Kamar.findOne({
         where: { id_kamar, deleted_at: null },
         include: [
@@ -168,7 +167,6 @@ const createPemesanan = async (req, res, next) => {
         return errorResponse(res, "Kamar tidak tersedia", 400);
       }
 
-      // Cek ketersediaan kamar pada rentang tanggal tersebut
       const pemesananKonflik = await PemesananKamar.findOne({
         where: {
           id_kamar,
@@ -205,7 +203,6 @@ const createPemesanan = async (req, res, next) => {
       const diffTime = Math.abs(keluar - masuk);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      // Hitung total biaya
       const hargaPerMalam =
         is_bpjs && kamar.TipeKamar.harga_bpjs
           ? kamar.TipeKamar.harga_bpjs
@@ -223,10 +220,8 @@ const createPemesanan = async (req, res, next) => {
         status: "pending",
       });
 
-      // Update status kamar
       await kamar.update({ status: "terisi" });
 
-      // Catat riwayat status
       await RiwayatStatusPemesanan.create({
         id_pemesanan: pemesanan.id_pemesanan,
         status_lama: null,
@@ -273,7 +268,6 @@ const updateStatusPemesanan = async (req, res, next) => {
       return errorResponse(res, "Pemesanan tidak ditemukan", 404);
     }
 
-    // Validasi transisi status
     const validTransitions = {
       pending: ["confirmed", "cancelled"],
       confirmed: ["checked_in", "cancelled"],
@@ -289,14 +283,12 @@ const updateStatusPemesanan = async (req, res, next) => {
     const statusLama = pemesanan.status;
     await pemesanan.update({ status });
 
-    // Update status kamar jika diperlukan
     if (status === "checked_out" || status === "cancelled") {
       await pemesanan.Kamar.update({ status: "tersedia" });
     } else if (status === "checked_in") {
       await pemesanan.Kamar.update({ status: "terisi" });
     }
 
-    // Catat riwayat status
     await RiwayatStatusPemesanan.create({
       id_pemesanan: pemesanan.id_pemesanan,
       status_lama: statusLama,
@@ -330,7 +322,6 @@ const cancelPemesanan = async (req, res, next) => {
       return errorResponse(res, "Pemesanan tidak ditemukan", 404);
     }
 
-    // Hanya pemesanan dengan status pending atau confirmed yang bisa dibatalkan
     if (!["pending", "confirmed"].includes(pemesanan.status)) {
       return errorResponse(
         res,
@@ -376,7 +367,6 @@ const deletePemesanan = async (req, res, next) => {
       return errorResponse(res, "Pemesanan tidak ditemukan", 404);
     }
 
-    // Hanya pemesanan yang dibatalkan atau selesai yang bisa dihapus
     if (!["cancelled", "checked_out"].includes(pemesanan.status)) {
       return errorResponse(
         res,
@@ -385,7 +375,6 @@ const deletePemesanan = async (req, res, next) => {
       );
     }
 
-    // Soft delete
     await pemesanan.update({ deleted_at: new Date() });
 
     successResponse(res, null, "Pemesanan berhasil dihapus");

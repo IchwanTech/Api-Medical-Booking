@@ -119,13 +119,13 @@ Mendapatkan informasi pengguna yang sedang login.
 
 ## User Management
 
-### Get All Users (Admin Only)
+### Get All Users
 
 Mendapatkan daftar semua pengguna.
 
 - **URL**: `/users`
 - **Method**: `GET`
-- **Auth required**: Yes (Admin Only)
+- **Auth required**: Yes
 - **Query Parameters**:
   - `page`: Nomor halaman (default: 1)
   - `size`: Jumlah item per halaman (default: 10)
@@ -169,13 +169,13 @@ Memperbarui data pengguna.
 
 **Response**: `200 OK`
 
-### Delete User (Admin Only)
+### Delete User
 
 Menghapus pengguna (soft delete).
 
 - **URL**: `/users/:id`
 - **Method**: `DELETE`
-- **Auth required**: Yes (Admin Only)
+- **Auth required**: Yes
 
 **Response**: `200 OK`
 

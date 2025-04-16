@@ -123,7 +123,6 @@ const createReview = async (req, res, next) => {
     } = req.body;
     const id_user = req.user.id_user;
 
-    // Validasi bahwa hanya satu dari id_dokter, id_layanan, atau id_pemesanan yang diisi
     const count = [id_dokter, id_layanan, id_pemesanan].filter(Boolean).length;
     if (count !== 1) {
       return errorResponse(
@@ -133,7 +132,6 @@ const createReview = async (req, res, next) => {
       );
     }
 
-    // Cek apakah rating valid (1-5)
     if (rating < 1 || rating > 5) {
       return errorResponse(res, "Rating harus antara 1 sampai 5", 400);
     }
@@ -168,7 +166,6 @@ const createReview = async (req, res, next) => {
         return errorResponse(res, "Pemesanan kamar tidak ditemukan", 404);
       }
 
-      // Pastikan pemesanan milik user yang membuat review
       if (relatedEntity.User.id_user !== id_user) {
         return errorResponse(
           res,
@@ -207,7 +204,6 @@ const updateReview = async (req, res, next) => {
       return errorResponse(res, "Review tidak ditemukan", 404);
     }
 
-    // Pastikan review milik user yang mengupdate
     if (review.id_user !== id_user) {
       return errorResponse(
         res,
@@ -216,7 +212,6 @@ const updateReview = async (req, res, next) => {
       );
     }
 
-    // Cek apakah rating valid (1-5)
     if (rating && (rating < 1 || rating > 5)) {
       return errorResponse(res, "Rating harus antara 1 sampai 5", 400);
     }
@@ -242,7 +237,6 @@ const deleteReview = async (req, res, next) => {
       return errorResponse(res, "Review tidak ditemukan", 404);
     }
 
-    // Pastikan review milik user yang menghapus atau admin
     if (review.id_user !== req.user.id_user && req.user.role !== "admin") {
       return errorResponse(
         res,
@@ -251,7 +245,6 @@ const deleteReview = async (req, res, next) => {
       );
     }
 
-    // Soft delete
     await review.update({ deleted_at: new Date() });
 
     successResponse(res, null, "Review berhasil dihapus");
@@ -264,7 +257,6 @@ const getRatingSummary = async (req, res, next) => {
   try {
     const { id_dokter, id_layanan, id_pemesanan } = req.query;
 
-    // Validasi bahwa hanya satu dari id_dokter, id_layanan, atau id_pemesanan yang diisi
     const count = [id_dokter, id_layanan, id_pemesanan].filter(Boolean).length;
     if (count !== 1) {
       return errorResponse(

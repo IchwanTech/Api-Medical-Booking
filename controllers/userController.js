@@ -58,7 +58,6 @@ const updateUser = async (req, res, next) => {
         return errorResponse(res, "Pengguna tidak ditemukan", 404);
       }
 
-      // Cek apakah email sudah digunakan oleh user lain
       if (email && email !== user.email) {
         const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
@@ -66,7 +65,6 @@ const updateUser = async (req, res, next) => {
         }
       }
 
-      // Update data user
       const updateData = {
         nama: nama || user.nama,
         email: email || user.email,
@@ -78,14 +76,12 @@ const updateUser = async (req, res, next) => {
         status_bpjs: status_bpjs || user.status_bpjs,
       };
 
-      // Jika password diupdate, hash password baru
       if (password) {
         updateData.password = await bcrypt.hash(password, 10);
       }
 
       await user.update(updateData);
 
-      // Ambil data user yang sudah diupdate (tanpa password)
       const updatedUser = await User.findByPk(id, {
         attributes: { exclude: ["password"] },
       });

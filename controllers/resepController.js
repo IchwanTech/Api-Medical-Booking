@@ -9,7 +9,6 @@ const createResep = async (req, res, next) => {
     const { id_rekam, id_obat, dosis, jumlah, aturan_pakai, is_bpjs } =
       req.body;
 
-    // Cek apakah rekam medis ada
     const rekamMedis = await RekamMedis.findOne({
       where: { id_rekam, deleted_at: null },
     });
@@ -17,13 +16,11 @@ const createResep = async (req, res, next) => {
       return errorResponse(res, "Rekam medis tidak ditemukan", 404);
     }
 
-    // Cek apakah obat ada
     const obat = await Obat.findOne({ where: { id_obat, deleted_at: null } });
     if (!obat) {
       return errorResponse(res, "Obat tidak ditemukan", 404);
     }
 
-    // Cek stok obat jika diperlukan
     if (obat.stok < jumlah) {
       return errorResponse(res, "Stok obat tidak mencukupi", 400);
     }
@@ -37,10 +34,8 @@ const createResep = async (req, res, next) => {
       is_bpjs: is_bpjs || false,
     });
 
-    // Kurangi stok obat
     await obat.update({ stok: obat.stok - jumlah });
 
-    // Catat riwayat stok
     await RiwayatStokObat.create({
       id_obat: obat.id_obat,
       stok_sebelum: obat.stok + jumlah,
@@ -76,19 +71,15 @@ const updateResep = async (req, res, next) => {
       return errorResponse(res, "Resep tidak ditemukan", 404);
     }
 
-    // Jika jumlah diubah, perlu penyesuaian stok
     if (jumlah && jumlah !== resep.jumlah) {
       const selisih = jumlah - resep.jumlah;
 
-      // Cek stok obat jika pengurangan
       if (selisih > 0 && resep.Obat.stok < selisih) {
         return errorResponse(res, "Stok obat tidak mencukupi", 400);
       }
 
-      // Update stok obat
       await resep.Obat.update({ stok: resep.Obat.stok - selisih });
 
-      // Catat riwayat stok
       await RiwayatStokObat.create({
         id_obat: resep.Obat.id_obat,
         stok_sebelum: resep.Obat.stok + selisih,
@@ -129,10 +120,8 @@ const deleteResep = async (req, res, next) => {
       return errorResponse(res, "Resep tidak ditemukan", 404);
     }
 
-    // Kembalikan stok obat
     await resep.Obat.update({ stok: resep.Obat.stok + resep.jumlah });
 
-    // Catat riwayat stok
     await RiwayatStokObat.create({
       id_obat: resep.Obat.id_obat,
       stok_sebelum: resep.Obat.stok - resep.jumlah,
@@ -143,7 +132,6 @@ const deleteResep = async (req, res, next) => {
       id_user_pengubah: req.user.id_user,
     });
 
-    // Soft delete
     await resep.update({ deleted_at: new Date() });
 
     successResponse(res, null, "Resep berhasil dihapus");

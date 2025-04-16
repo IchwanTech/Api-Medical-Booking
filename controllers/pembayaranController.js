@@ -173,7 +173,6 @@ const createPembayaran = async (req, res, next) => {
       } = req.body;
       const id_user = req.user.id_user;
 
-      // Validasi bahwa hanya satu dari id_janji, id_pemesanan, atau id_layanan yang diisi
       const count = [id_janji, id_pemesanan, id_layanan].filter(Boolean).length;
       if (count !== 1) {
         return errorResponse(
@@ -202,7 +201,6 @@ const createPembayaran = async (req, res, next) => {
           return errorResponse(res, "Janji temu tidak ditemukan", 404);
         }
 
-        // Jika menggunakan BPJS, gunakan biaya_bpjs
         if (relatedEntity.is_bpjs && relatedEntity.Dokter.biaya_bpjs) {
           jumlahBpjsFinal = relatedEntity.Dokter.biaya_bpjs;
           jumlahFinal = 0;
@@ -230,13 +228,11 @@ const createPembayaran = async (req, res, next) => {
           return errorResponse(res, "Pemesanan kamar tidak ditemukan", 404);
         }
 
-        // Hitung jumlah hari
         const masuk = new Date(relatedEntity.tanggal_masuk);
         const keluar = new Date(relatedEntity.tanggal_keluar);
         const diffTime = Math.abs(keluar - masuk);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        // Jika menggunakan BPJS, gunakan harga_bpjs
         if (relatedEntity.is_bpjs && relatedEntity.Kamar.TipeKamar.harga_bpjs) {
           jumlahBpjsFinal = relatedEntity.Kamar.TipeKamar.harga_bpjs * diffDays;
           jumlahFinal = 0;
@@ -252,7 +248,6 @@ const createPembayaran = async (req, res, next) => {
           return errorResponse(res, "Layanan tidak ditemukan", 404);
         }
 
-        // Jika menggunakan BPJS dan layanan ditanggung, gunakan harga_bpjs
         if (relatedEntity.ditanggung_bpjs && relatedEntity.harga_bpjs) {
           jumlahBpjsFinal = relatedEntity.harga_bpjs;
           jumlahFinal = 0;
@@ -335,7 +330,6 @@ const updateStatusPembayaran = async (req, res, next) => {
       return errorResponse(res, "Pembayaran tidak ditemukan", 404);
     }
 
-    // Validasi transisi status
     const validTransitions = {
       pending: ["success", "failed"],
       success: ["refunded"],
@@ -354,7 +348,6 @@ const updateStatusPembayaran = async (req, res, next) => {
         status === "success" ? new Date() : pembayaran.tanggal_bayar,
     });
 
-    // Catat riwayat status
     await RiwayatStatusPembayaran.create({
       id_pembayaran: pembayaran.id_pembayaran,
       status_lama: statusLama,
@@ -382,7 +375,6 @@ const deletePembayaran = async (req, res, next) => {
       return errorResponse(res, "Pembayaran tidak ditemukan", 404);
     }
 
-    // Hanya pembayaran yang gagal atau pending yang bisa dihapus
     if (!["pending", "failed"].includes(pembayaran.status)) {
       return errorResponse(
         res,

@@ -2,16 +2,13 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// Membuat folder upload jika belum ada
 const uploadDir = path.join(__dirname, "../public/uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Konfigurasi penyimpanan
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Simpan semua file langsung di folder uploads
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
@@ -21,7 +18,6 @@ const storage = multer.diskStorage({
   },
 });
 
-// Filter file
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     "image/jpeg",
@@ -45,20 +41,16 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
+    fileSize: 5 * 1024 * 1024,
   },
 });
 
-// Middleware khusus untuk upload foto dokter
 const uploadFotoDokter = upload.single("foto");
 
-// Middleware khusus untuk upload foto kamar
 const uploadFotoKamar = upload.single("url_foto");
 
-// Middleware khusus untuk upload bukti pembayaran
 const uploadBuktiPembayaran = upload.single("bukti_pembayaran");
 
-// Middleware khusus untuk upload lampiran rekam medis
 const uploadLampiranRekamMedis = upload.single("url_file");
 
 // Fungsi untuk menghapus file

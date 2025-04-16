@@ -436,7 +436,6 @@ const getKamarTersedia = async (req, res, next) => {
   }
 };
 
-// Foto Kamar
 const addFotoKamar = async (req, res, next) => {
   try {
     uploadFotoKamar(req, res, async (err) => {
