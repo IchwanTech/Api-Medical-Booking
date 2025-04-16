@@ -109,7 +109,6 @@ const updateStatusAntrian = async (req, res, next) => {
 
     await antrian.update({ status });
 
-    // Jika status diubah menjadi 'dilayani', update janji temu menjadi 'completed'
     if (status === "dilayani" && antrian.JanjiTemu) {
       await antrian.JanjiTemu.update({ status: "completed" });
     }

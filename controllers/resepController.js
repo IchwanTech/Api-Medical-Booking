@@ -1,4 +1,4 @@
-const { ResepObat, RekamMedis, Obat } = require("../models");
+const { ResepObat, RekamMedis, Obat, RiwayatStokObat } = require("../models");
 const {
   successResponse,
   errorResponse,

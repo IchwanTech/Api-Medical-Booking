@@ -34,16 +34,13 @@ const register = async (req, res, next) => {
         status_bpjs,
       } = req.body;
 
-      // Cek apakah email sudah terdaftar
       const existingUser = await User.findOne({ where: { email } });
       if (existingUser) {
         return errorResponse(res, "Email sudah terdaftar", 400);
       }
 
-      // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Buat user baru
       const user = await User.create({
         nama,
         email,
@@ -56,7 +53,6 @@ const register = async (req, res, next) => {
         status_bpjs,
       });
 
-      // Kirim email registrasi
       await sendRegistrationEmail(user);
 
       successResponse(res, { user }, "Registrasi berhasil", 201);
@@ -72,29 +68,24 @@ const login = async (req, res, next) => {
     validateResult(req, res, async () => {
       const { email, password } = req.body;
 
-      // Cari user berdasarkan email
       const user = await User.findOne({ where: { email } });
       if (!user) {
         return errorResponse(res, "Email atau password salah", 401);
       }
 
-      // Verifikasi password
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
         return errorResponse(res, "Email atau password salah", 401);
       }
 
-      // Buat sesi baru
       const sessionId = await createSession(
         user,
         req.ip,
         req.headers["user-agent"]
       );
 
-      // Generate token
       const token = generateToken(user, sessionId);
 
-      // Response dengan token
       successResponse(res, {
         token,
         user: {

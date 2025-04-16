@@ -37,7 +37,6 @@ const getAllDokter = async (req, res, next) => {
       order: [["nama", "ASC"]],
     });
 
-    // Hitung rating rata-rata
     const dokterWithRating = data.rows.map((dokter) => {
       const ratings = dokter.Reviews.map((review) => review.rating);
       const avgRating =
@@ -95,7 +94,6 @@ const getDokterById = async (req, res, next) => {
       return errorResponse(res, "Dokter tidak ditemukan", 404);
     }
 
-    // Hitung rating rata-rata
     const ratings = dokter.Reviews.map((review) => review.rating);
     const avgRating =
       ratings.length > 0

@@ -1,4 +1,4 @@
-# Sistem Manajemen Rumah Sakit - API Documentation
+# Medical Booking - API Documentation
 
 ## Overview
 
