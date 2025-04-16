@@ -87,7 +87,6 @@ const validatePembayaran = [
     .isInt()
     .withMessage("ID Pemesanan harus angka"),
   check("id_layanan").optional().isInt().withMessage("ID Layanan harus angka"),
-  check("jumlah").isFloat({ min: 0 }).withMessage("Jumlah harus angka positif"),
   check("metode")
     .isIn([
       "tunai",

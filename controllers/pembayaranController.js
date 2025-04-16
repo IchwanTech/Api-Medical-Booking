@@ -5,6 +5,8 @@ const {
   Layanan,
   User,
   RiwayatStatusPembayaran,
+  Dokter,
+  Kamar,
 } = require("../models");
 const { validatePembayaran, validateResult } = require("../utils/validators");
 const {

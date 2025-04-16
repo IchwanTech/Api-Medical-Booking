@@ -8,7 +8,6 @@ const { getPagination, getPagingData } = require("../utils/paginationHelper");
 const { uploadFotoKamar } = require("../middleware/upload");
 const { Op } = require("sequelize");
 
-// Tipe Kamar
 const getAllTipeKamar = async (req, res, next) => {
   try {
     const { page = 1, size = 10 } = req.query;
@@ -58,7 +57,6 @@ const createTipeKamar = async (req, res, next) => {
 
     console.log("Request body:", req.body);
 
-    // Validasi input dasar
     if (!nama_tipe) {
       return errorResponse(res, "Nama tipe kamar wajib diisi", 400);
     }
@@ -90,7 +88,6 @@ const createTipeKamar = async (req, res, next) => {
       parameters: error.parameters || "No parameters available",
     });
 
-    // Jika ada error.original, log juga
     if (error.original) {
       console.error("Original error:", {
         code: error.original.code,
@@ -149,7 +146,6 @@ const deleteTipeKamar = async (req, res, next) => {
       return errorResponse(res, "Tipe kamar tidak ditemukan", 404);
     }
 
-    // Cek apakah ada kamar yang menggunakan tipe ini
     const kamarTerpakai = await Kamar.findOne({
       where: { id_tipe: tipeKamar.id_tipe, deleted_at: null },
     });
@@ -161,7 +157,6 @@ const deleteTipeKamar = async (req, res, next) => {
       );
     }
 
-    // Soft delete
     await tipeKamar.update({ deleted_at: new Date() });
 
     successResponse(res, null, "Tipe kamar berhasil dihapus");
@@ -170,7 +165,6 @@ const deleteTipeKamar = async (req, res, next) => {
   }
 };
 
-// Kamar
 const getAllKamar = async (req, res, next) => {
   try {
     const { page = 1, size = 10, id_tipe, status, lantai } = req.query;
@@ -262,7 +256,6 @@ const createKamar = async (req, res, next) => {
   try {
     const { id_tipe, nomor_kamar, lantai } = req.body;
 
-    // Cek apakah tipe kamar ada
     const tipeKamar = await TipeKamar.findOne({
       where: { id_tipe, deleted_at: null },
     });
@@ -270,7 +263,6 @@ const createKamar = async (req, res, next) => {
       return errorResponse(res, "Tipe kamar tidak ditemukan", 404);
     }
 
-    // Cek apakah nomor kamar sudah digunakan
     const existingKamar = await Kamar.findOne({ where: { nomor_kamar } });
     if (existingKamar) {
       return errorResponse(res, "Nomor kamar sudah digunakan", 400);
@@ -301,7 +293,6 @@ const updateKamar = async (req, res, next) => {
       return errorResponse(res, "Kamar tidak ditemukan", 404);
     }
 
-    // Cek apakah tipe kamar ada
     if (id_tipe) {
       const tipeKamar = await TipeKamar.findOne({
         where: { id_tipe, deleted_at: null },
@@ -311,7 +302,6 @@ const updateKamar = async (req, res, next) => {
       }
     }
 
-    // Cek apakah nomor kamar sudah digunakan oleh kamar lain
     if (nomor_kamar && nomor_kamar !== kamar.nomor_kamar) {
       const existingKamar = await Kamar.findOne({ where: { nomor_kamar } });
       if (existingKamar) {
@@ -341,7 +331,6 @@ const deleteKamar = async (req, res, next) => {
       return errorResponse(res, "Kamar tidak ditemukan", 404);
     }
 
-    // Cek apakah kamar sedang digunakan
     if (kamar.status === "terisi") {
       return errorResponse(
         res,
@@ -350,7 +339,6 @@ const deleteKamar = async (req, res, next) => {
       );
     }
 
-    // Soft delete
     await kamar.update({ deleted_at: new Date() });
 
     successResponse(res, null, "Kamar berhasil dihapus");
@@ -371,7 +359,6 @@ const getKamarTersedia = async (req, res, next) => {
       );
     }
 
-    // Cari kamar yang tersedia pada rentang tanggal tersebut
     const kamarTerpakai = await Kamar.findAll({
       include: [
         {
@@ -460,7 +447,6 @@ const addFotoKamar = async (req, res, next) => {
       const { id_kamar } = req.params;
       const { deskripsi, is_primary } = req.body;
 
-      // Cek apakah kamar ada
       const kamar = await Kamar.findOne({
         where: { id_kamar, deleted_at: null },
       });
@@ -468,7 +454,6 @@ const addFotoKamar = async (req, res, next) => {
         return errorResponse(res, "Kamar tidak ditemukan", 404);
       }
 
-      // Jika di-set sebagai primary, update semua foto kamar ini menjadi non-primary
       if (is_primary) {
         await FotoKamar.update({ is_primary: false }, { where: { id_kamar } });
       }
@@ -497,7 +482,6 @@ const updateFotoKamar = async (req, res, next) => {
     const { id_kamar, id_foto } = req.params;
     const { deskripsi, is_primary } = req.body;
 
-    // Cek apakah kamar ada
     const kamar = await Kamar.findOne({
       where: { id_kamar, deleted_at: null },
     });
@@ -505,13 +489,11 @@ const updateFotoKamar = async (req, res, next) => {
       return errorResponse(res, "Kamar tidak ditemukan", 404);
     }
 
-    // Cek apakah foto ada
     const fotoKamar = await FotoKamar.findOne({ where: { id_foto, id_kamar } });
     if (!fotoKamar) {
       return errorResponse(res, "Foto kamar tidak ditemukan", 404);
     }
 
-    // Jika di-set sebagai primary, update semua foto kamar ini menjadi non-primary
     if (is_primary) {
       await FotoKamar.update({ is_primary: false }, { where: { id_kamar } });
     }
@@ -531,7 +513,6 @@ const deleteFotoKamar = async (req, res, next) => {
   try {
     const { id_kamar, id_foto } = req.params;
 
-    // Cek apakah kamar ada
     const kamar = await Kamar.findOne({
       where: { id_kamar, deleted_at: null },
     });
@@ -539,13 +520,11 @@ const deleteFotoKamar = async (req, res, next) => {
       return errorResponse(res, "Kamar tidak ditemukan", 404);
     }
 
-    // Cek apakah foto ada
     const fotoKamar = await FotoKamar.findOne({ where: { id_foto, id_kamar } });
     if (!fotoKamar) {
       return errorResponse(res, "Foto kamar tidak ditemukan", 404);
     }
 
-    // Jika foto ini primary, set foto lain sebagai primary (jika ada)
     if (fotoKamar.is_primary) {
       const anotherFoto = await FotoKamar.findOne({
         where: { id_kamar, id_foto: { [Op.ne]: id_foto } },
@@ -565,22 +544,17 @@ const deleteFotoKamar = async (req, res, next) => {
 };
 
 module.exports = {
-  // Tipe Kamar
   getAllTipeKamar,
   getTipeKamarById,
   createTipeKamar,
   updateTipeKamar,
   deleteTipeKamar,
-
-  // Kamar
   getAllKamar,
   getKamarById,
   createKamar,
   updateKamar,
   deleteKamar,
   getKamarTersedia,
-
-  // Foto Kamar
   addFotoKamar,
   updateFotoKamar,
   deleteFotoKamar,

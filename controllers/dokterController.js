@@ -115,7 +115,6 @@ const getDokterById = async (req, res, next) => {
 
 const createDokter = async (req, res, next) => {
   try {
-    // Jalankan middleware upload terlebih dahulu
     uploadFotoDokter(req, res, async (err) => {
       if (err) {
         return errorResponse(res, err.message, 400);
@@ -124,7 +123,6 @@ const createDokter = async (req, res, next) => {
       console.log("Body setelah upload:", req.body);
       console.log("File uploaded:", req.file);
 
-      // Konversi nilai-nilai numerik
       if (req.body.biaya_konsultasi) {
         req.body.biaya_konsultasi = parseFloat(req.body.biaya_konsultasi);
       }
@@ -161,10 +159,8 @@ const createDokter = async (req, res, next) => {
         pengalaman,
       } = req.body;
 
-      // Cek apakah no_str sudah digunakan
       const existingDokter = await Dokter.findOne({ where: { no_str } });
       if (existingDokter) {
-        // Hapus file jika validasi gagal
         if (req.file) {
           fs.unlinkSync(req.file.path);
         }
@@ -182,7 +178,6 @@ const createDokter = async (req, res, next) => {
       };
 
       if (req.file) {
-        // Gunakan path relatif untuk menyimpan di database
         dokterData.foto = `/uploads/${req.file.filename}`;
       }
 
@@ -205,7 +200,6 @@ const updateDokter = async (req, res, next) => {
       console.log("Update body:", req.body);
       console.log("Update file:", req.file);
 
-      // Konversi nilai-nilai numerik
       if (req.body.biaya_konsultasi) {
         req.body.biaya_konsultasi = parseFloat(req.body.biaya_konsultasi);
       }
@@ -218,7 +212,6 @@ const updateDokter = async (req, res, next) => {
         req.body.pengalaman = parseInt(req.body.pengalaman);
       }
 
-      // Validasi setelah konversi
       await Promise.all(
         validateDokter.map((validation) => validation.run(req))
       );
@@ -284,21 +277,16 @@ const updateDokter = async (req, res, next) => {
       let oldFotoPath = null;
 
       if (req.file) {
-        // Jika ada foto lama dan foto baru diupload
         if (dokter.foto) {
-          // Pastikan path diarahkan dengan benar ke lokasi file
           oldFotoPath = path.join(__dirname, "../public", dokter.foto);
           console.log("Foto lama yang akan dihapus:", oldFotoPath);
         }
 
-        // Set foto baru
         updateData.foto = `/uploads/${req.file.filename}`;
       }
 
-      // Update data dokter dulu
       const updatedDokter = await dokter.update(updateData);
 
-      // Hapus file lama jika ada dan file tersebut ada
       if (oldFotoPath) {
         try {
           if (fs.existsSync(oldFotoPath)) {
@@ -310,7 +298,6 @@ const updateDokter = async (req, res, next) => {
           }
         } catch (err) {
           console.error("Error saat menghapus foto lama:", err);
-          // Lanjutkan proses meskipun gagal menghapus foto lama
         }
       }
 

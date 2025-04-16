@@ -176,12 +176,9 @@ const createJanjiTemu = async (req, res, next) => {
         );
       }
 
-      // Mulai transaction
       const transaction = await sequelize.transaction();
 
       try {
-        // 1. Buat antrian terlebih dahulu
-        // Hitung nomor antrian berikutnya
         const lastAntrian = await Antrian.findOne({
           where: {
             id_jadwal,
@@ -193,7 +190,6 @@ const createJanjiTemu = async (req, res, next) => {
 
         const nomorAntrian = lastAntrian ? lastAntrian.nomor_antrian + 1 : 1;
 
-        // Buat antrian
         const antrian = await Antrian.create(
           {
             id_jadwal,
@@ -204,13 +200,12 @@ const createJanjiTemu = async (req, res, next) => {
           { transaction }
         );
 
-        // 2. Buat janji temu yang terkait dengan antrian
         const janjiTemu = await JanjiTemu.create(
           {
             id_dokter,
             id_user,
             id_jadwal,
-            id_antrian: antrian.id_antrian, // Kaitkan dengan antrian
+            id_antrian: antrian.id_antrian,
             tanggal,
             keluhan: keluhan || null,
             is_bpjs: is_bpjs || false,
@@ -220,7 +215,6 @@ const createJanjiTemu = async (req, res, next) => {
           { transaction }
         );
 
-        // 3. Ambil data lengkap untuk email
         const janjiTemuWithDetails = await JanjiTemu.findByPk(
           janjiTemu.id_janji,
           {
@@ -246,10 +240,8 @@ const createJanjiTemu = async (req, res, next) => {
           }
         );
 
-        // 4. Commit transaction
         await transaction.commit();
 
-        // 5. Kirim email
         await sendAppointmentConfirmation(
           janjiTemuWithDetails.User,
           janjiTemuWithDetails
@@ -257,7 +249,6 @@ const createJanjiTemu = async (req, res, next) => {
 
         successResponse(res, { janjiTemu }, "Janji temu berhasil dibuat", 201);
       } catch (error) {
-        // Rollback jika gagal
         await transaction.rollback();
         throw error;
       }
@@ -290,7 +281,6 @@ const updateStatusJanjiTemu = async (req, res, next) => {
       return errorResponse(res, "Janji temu tidak ditemukan", 404);
     }
 
-    // Validasi transisi status
     const validTransitions = {
       pending: ["confirmed", "cancelled"],
       confirmed: ["completed", "cancelled"],
@@ -305,7 +295,6 @@ const updateStatusJanjiTemu = async (req, res, next) => {
     const statusLama = janjiTemu.status;
     await janjiTemu.update({ status });
 
-    // Jika ada antrian, update status antrian juga
     if (janjiTemu.Antrian) {
       let statusAntrian = janjiTemu.Antrian.status;
 
@@ -318,7 +307,6 @@ const updateStatusJanjiTemu = async (req, res, next) => {
       await janjiTemu.Antrian.update({ status: statusAntrian });
     }
 
-    // Catat riwayat status
     await RiwayatStatusJanji.create({
       id_janji: janjiTemu.id_janji,
       status_lama: statusLama,
@@ -356,7 +344,6 @@ const cancelJanjiTemu = async (req, res, next) => {
       return errorResponse(res, "Janji temu tidak ditemukan", 404);
     }
 
-    // Hanya janji temu dengan status pending atau confirmed yang bisa dibatalkan
     if (!["pending", "confirmed"].includes(janjiTemu.status)) {
       return errorResponse(
         res,
@@ -368,12 +355,10 @@ const cancelJanjiTemu = async (req, res, next) => {
     const statusLama = janjiTemu.status;
     await janjiTemu.update({ status: "cancelled" });
 
-    // Jika ada antrian, update status antrian
     if (janjiTemu.Antrian) {
       await janjiTemu.Antrian.update({ status: "batal" });
     }
 
-    // Catat riwayat status
     await RiwayatStatusJanji.create({
       id_janji: janjiTemu.id_janji,
       status_lama: statusLama,
@@ -404,7 +389,6 @@ const deleteJanjiTemu = async (req, res, next) => {
       return errorResponse(res, "Janji temu tidak ditemukan", 404);
     }
 
-    // Hanya janji temu yang dibatalkan atau selesai yang bisa dihapus
     if (!["cancelled", "completed"].includes(janjiTemu.status)) {
       return errorResponse(
         res,
@@ -413,7 +397,6 @@ const deleteJanjiTemu = async (req, res, next) => {
       );
     }
 
-    // Soft delete
     await janjiTemu.update({ deleted_at: new Date() });
 
     successResponse(res, null, "Janji temu berhasil dihapus");

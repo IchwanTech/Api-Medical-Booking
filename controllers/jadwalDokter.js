@@ -86,7 +86,6 @@ const createJadwal = async (req, res, next) => {
         return errorResponse(res, "Dokter tidak ditemukan", 404);
       }
 
-      // Cek konflik jadwal
       const conflictingSchedule = await JadwalDokter.findOne({
         where: {
           id_dokter,
@@ -156,7 +155,6 @@ const updateJadwal = async (req, res, next) => {
         return errorResponse(res, "Jadwal tidak ditemukan", 404);
       }
 
-      // Cek apakah dokter ada
       const dokter = await Dokter.findOne({
         where: { id_dokter, deleted_at: null },
       });
@@ -164,7 +162,6 @@ const updateJadwal = async (req, res, next) => {
         return errorResponse(res, "Dokter tidak ditemukan", 404);
       }
 
-      // Cek konflik jadwal (kecuali dengan dirinya sendiri)
       const conflictingSchedule = await JadwalDokter.findOne({
         where: {
           id_dokter,
@@ -221,7 +218,6 @@ const deleteJadwal = async (req, res, next) => {
       return errorResponse(res, "Jadwal tidak ditemukan", 404);
     }
 
-    // Soft delete
     await jadwal.update({ deleted_at: new Date() });
 
     successResponse(res, null, "Jadwal berhasil dihapus");
