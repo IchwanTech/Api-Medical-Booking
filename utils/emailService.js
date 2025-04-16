@@ -47,8 +47,13 @@ const sendRegistrationEmail = async (user) => {
 };
 
 const sendAppointmentConfirmation = async (user, janjiTemu) => {
+  // Tambahkan pengecekan untuk nomor antrian
+  const nomorAntrian = janjiTemu.Antrian
+    ? janjiTemu.Antrian.nomor_antrian
+    : "Akan diinformasikan kemudian";
+
   const subject = "Konfirmasi Janji Temu";
-  const text = `Halo ${user.nama},\n\nJanji temu Anda telah berhasil dibuat dengan detail sebagai berikut:\n\nDokter: ${janjiTemu.Dokter.nama}\nSpesialis: ${janjiTemu.Dokter.spesialis}\nTanggal: ${janjiTemu.tanggal}\nJam: ${janjiTemu.JadwalDokter.jam_mulai} - ${janjiTemu.JadwalDokter.jam_selesai}\nNomor Antrian: ${janjiTemu.Antrian.nomor_antrian}\n\nSalam,\nTim Medical Booking`;
+  const text = `Halo ${user.nama},\n\nJanji temu Anda telah berhasil dibuat dengan detail sebagai berikut:\n\nDokter: ${janjiTemu.Dokter.nama}\nSpesialis: ${janjiTemu.Dokter.spesialis}\nTanggal: ${janjiTemu.tanggal}\nJam: ${janjiTemu.JadwalDokter.jam_mulai} - ${janjiTemu.JadwalDokter.jam_selesai}\nNomor Antrian: ${nomorAntrian}\n\nSalam,\nTim Medical Booking`;
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -59,8 +64,8 @@ const sendAppointmentConfirmation = async (user, janjiTemu) => {
       <p><strong>Spesialis:</strong> ${janjiTemu.Dokter.spesialis}</p>
       <p><strong>Tanggal:</strong> ${janjiTemu.tanggal}</p>
       <p><strong>Jam:</strong> ${janjiTemu.JadwalDokter.jam_mulai} - ${janjiTemu.JadwalDokter.jam_selesai}</p>
-      <p><strong>Nomor Antrian:</strong> ${janjiTemu.Antrian.nomor_antrian}</p>
-      <p>Salam,<br>Tim Healthcare Booking System</p>
+      <p><strong>Nomor Antrian:</strong> ${nomorAntrian}</p>
+      <p>Salam,<br>Tim Medical Booking</p>
     </div>
   `;
 

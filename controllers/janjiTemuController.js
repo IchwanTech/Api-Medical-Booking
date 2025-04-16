@@ -5,6 +5,8 @@ const {
   Antrian,
   User,
   RekamMedis,
+  RiwayatStatusJanji,
+  sequelize,
 } = require("../models");
 const { validateJanjiTemu, validateResult } = require("../utils/validators");
 const {
@@ -122,7 +124,7 @@ const createJanjiTemu = async (req, res, next) => {
         req.body;
       const id_user = req.user.id_user;
 
-      // Cek apakah dokter ada
+      // Verifikasi data (kode validasi tetap sama)
       const dokter = await Dokter.findOne({
         where: { id_dokter, deleted_at: null },
       });
@@ -130,7 +132,6 @@ const createJanjiTemu = async (req, res, next) => {
         return errorResponse(res, "Dokter tidak ditemukan", 404);
       }
 
-      // Cek apakah jadwal ada dan milik dokter yang benar
       const jadwal = await JadwalDokter.findOne({
         where: { id_jadwal, id_dokter, deleted_at: null },
       });
@@ -138,7 +139,6 @@ const createJanjiTemu = async (req, res, next) => {
         return errorResponse(res, "Jadwal tidak ditemukan", 404);
       }
 
-      // Cek apakah hari pada tanggal sesuai dengan jadwal
       const hariJanji = new Date(tanggal).toLocaleDateString("id-ID", {
         weekday: "long",
       });
@@ -150,7 +150,6 @@ const createJanjiTemu = async (req, res, next) => {
         );
       }
 
-      // Cek apakah tanggal sudah lewat
       const today = new Date().toISOString().split("T")[0];
       if (tanggal < today) {
         return errorResponse(
@@ -160,7 +159,6 @@ const createJanjiTemu = async (req, res, next) => {
         );
       }
 
-      // Cek kuota janji temu pada tanggal tersebut
       const jumlahJanji = await JanjiTemu.count({
         where: {
           id_jadwal,
@@ -178,51 +176,91 @@ const createJanjiTemu = async (req, res, next) => {
         );
       }
 
-      // Buat janji temu
-      const janjiTemu = await JanjiTemu.create({
-        id_dokter,
-        id_user,
-        id_jadwal,
-        tanggal,
-        keluhan: keluhan || null,
-        is_bpjs: is_bpjs || false,
-        rujukan_bpjs: rujukan_bpjs || null,
-        status: "pending",
-      });
+      // Mulai transaction
+      const transaction = await sequelize.transaction();
 
-      // Trigger akan membuat antrian otomatis (lihat trigger di model)
+      try {
+        // 1. Buat antrian terlebih dahulu
+        // Hitung nomor antrian berikutnya
+        const lastAntrian = await Antrian.findOne({
+          where: {
+            id_jadwal,
+            tanggal,
+          },
+          order: [["nomor_antrian", "DESC"]],
+          transaction,
+        });
 
-      // Kirim email konfirmasi
-      const janjiTemuWithDetails = await JanjiTemu.findByPk(
-        janjiTemu.id_janji,
-        {
-          include: [
-            {
-              model: Dokter,
-              attributes: ["nama", "spesialis"],
-            },
-            {
-              model: JadwalDokter,
-              attributes: ["jam_mulai", "jam_selesai"],
-            },
-            {
-              model: Antrian,
-              attributes: ["nomor_antrian"],
-            },
-            {
-              model: User,
-              attributes: ["nama", "email"],
-            },
-          ],
-        }
-      );
+        const nomorAntrian = lastAntrian ? lastAntrian.nomor_antrian + 1 : 1;
 
-      await sendAppointmentConfirmation(
-        janjiTemuWithDetails.User,
-        janjiTemuWithDetails
-      );
+        // Buat antrian
+        const antrian = await Antrian.create(
+          {
+            id_jadwal,
+            tanggal,
+            nomor_antrian: nomorAntrian,
+            status: "menunggu",
+          },
+          { transaction }
+        );
 
-      successResponse(res, { janjiTemu }, "Janji temu berhasil dibuat", 201);
+        // 2. Buat janji temu yang terkait dengan antrian
+        const janjiTemu = await JanjiTemu.create(
+          {
+            id_dokter,
+            id_user,
+            id_jadwal,
+            id_antrian: antrian.id_antrian, // Kaitkan dengan antrian
+            tanggal,
+            keluhan: keluhan || null,
+            is_bpjs: is_bpjs || false,
+            rujukan_bpjs: rujukan_bpjs || null,
+            status: "pending",
+          },
+          { transaction }
+        );
+
+        // 3. Ambil data lengkap untuk email
+        const janjiTemuWithDetails = await JanjiTemu.findByPk(
+          janjiTemu.id_janji,
+          {
+            include: [
+              {
+                model: Dokter,
+                attributes: ["nama", "spesialis"],
+              },
+              {
+                model: JadwalDokter,
+                attributes: ["jam_mulai", "jam_selesai"],
+              },
+              {
+                model: Antrian,
+                attributes: ["nomor_antrian"],
+              },
+              {
+                model: User,
+                attributes: ["nama", "email"],
+              },
+            ],
+            transaction,
+          }
+        );
+
+        // 4. Commit transaction
+        await transaction.commit();
+
+        // 5. Kirim email
+        await sendAppointmentConfirmation(
+          janjiTemuWithDetails.User,
+          janjiTemuWithDetails
+        );
+
+        successResponse(res, { janjiTemu }, "Janji temu berhasil dibuat", 201);
+      } catch (error) {
+        // Rollback jika gagal
+        await transaction.rollback();
+        throw error;
+      }
     });
   } catch (error) {
     next(error);
