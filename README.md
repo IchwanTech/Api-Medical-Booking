@@ -45,21 +45,22 @@ Mendaftarkan pengguna baru.
   "message": "Registrasi berhasil",
   "data": {
     "user": {
-      "created_at": "2025-04-16T02:27:17.290Z",
-      "updated_at": "2025-04-16T02:27:17.290Z",
-      "id_user": 2,
-      "nama": "Muhammad Fatih Azzam",
-      "email": "fatihazzam33@gmail.com",
-      "password": "$2a$10$8cLqzrJqhn6EojerIZ3cc.VbtYatO09aziECMwok8cO8ELuCL5TLG",
-      "role": "admin",
-      "no_telp": "0895327619259",
-      "alamat": "Jalan Alamanda Molek No. 35, Jakarta",
-      "tanggal_lahir": "2006-11-30",
-      "no_bpjs": "1234567890987",
+      "created_at": "2025-04-24T10:00:00.000Z",
+      "updated_at": "2025-04-24T10:00:00.000Z",
+      "id_user": 3,
+      "nama": "Nama Pengguna",
+      "email": "user@example.com",
+      "password": "$2a$10$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", 
+      "role": "pasien",
+      "no_telp": "081234567890",
+      "alamat": "Jalan Contoh No. 123",
+      "tanggal_lahir": "1990-01-01",
+      "no_bpjs": "1234567890",
       "status_bpjs": "aktif"
     }
   }
 }
+
 ```
 
 ### Login
