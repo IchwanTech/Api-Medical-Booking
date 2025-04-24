@@ -206,15 +206,14 @@ Mendapatkan detail dokter berdasarkan ID.
 
 **Response**: `200 OK`
 
-### Create Dokter (Admin Only)
+### Create Dokter 
 
 Menambahkan dokter baru.
 
 - **URL**: `/dokter`
 - **Method**: `POST`
 - **Content-Type**: `multipart/form-data`
-- **Auth required**: Yes (Admin Only)
-
+- **Auth required**: Yes
 **Request Body**:
 
 - `nama`: Nama dokter (text)
@@ -228,14 +227,14 @@ Menambahkan dokter baru.
 
 **Response**: `201 Created`
 
-### Update Dokter (Admin Only)
+### Update Dokter
 
 Memperbarui data dokter.
 
 - **URL**: `/dokter/:id`
 - **Method**: `PUT`
 - **Content-Type**: `multipart/form-data`
-- **Auth required**: Yes (Admin Only)
+- **Auth required**: Yes 
 
 **Request Body**:
 
@@ -250,14 +249,13 @@ Memperbarui data dokter.
 
 **Response**: `200 OK`
 
-### Delete Dokter (Admin Only)
+### Delete Dokter 
 
 Menghapus dokter (soft delete).
 
 - **URL**: `/dokter/:id`
 - **Method**: `DELETE`
-- **Auth required**: Yes (Admin Only)
-
+- **Auth required**: Yes
 **Response**: `200 OK`
 
 ### Search Dokter By Specialization
